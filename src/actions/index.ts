@@ -1,1 +1,5 @@
-export const server = {};
+import { jsonActions } from "./json";
+
+export const server = {
+  ...jsonActions,
+};

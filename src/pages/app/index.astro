@@ -1,46 +1,319 @@
 ---
-import { AvButton, AvCard, AvContainer } from "@ansiversa/components";
-import AppShell from "../../layouts/AppShell.astro";
+import { JsonFormatOperations, JsonSnippets, db, desc, eq } from "astro:db";
+import { AvButton, AvCard, AvContainer, AvDrawer, AvPageHeader } from "@ansiversa/components";
+import AvBadge from "../../components/AvBadge.astro";
+import AvTabs from "../../components/AvTabs.astro";
 import { APP_META } from "../../app.meta";
+import JsonFormatterDashboardSummary from "../../components/JsonFormatterDashboardSummary.astro";
+import { buildJsonFormatterSummary } from "../../dashboard/summary";
+import AppShell from "../../layouts/AppShell.astro";
 
-const title = `${APP_META.name} App`;
-const description = `Protected workspace for ${APP_META.name}.`;
+const user = Astro.locals.user;
+const seedRawJson = `{
+  "ansiversa": true,
+  "app": "json-formatter",
+  "version": 1
+}`;
+const seedFormattedJson = JSON.stringify(JSON.parse(seedRawJson), null, 2);
 
-const checkpoints = [
-  "The public landing page is aligned to the current Ansiversa product standard.",
-  "Authenticated entry stays on /app so future workflows follow the shared ecosystem pattern.",
-  "Shared metadata, middleware, layout, and component dependencies are already synced for the next build phase.",
+const snippets = user
+  ? await db
+      .select()
+      .from(JsonSnippets)
+      .where(eq(JsonSnippets.userId, user.id))
+      .orderBy(desc(JsonSnippets.updatedAt))
+  : [];
+
+const operations = user
+  ? await db
+      .select()
+      .from(JsonFormatOperations)
+      .where(eq(JsonFormatOperations.userId, user.id))
+      .orderBy(desc(JsonFormatOperations.createdAt))
+      .limit(20)
+  : [];
+
+const summary = user
+  ? await buildJsonFormatterSummary(user.id)
+  : {
+      appId: APP_META.key,
+      version: 1 as const,
+      updatedAt: new Date().toISOString(),
+      totalOperations: 0,
+      validCount: 0,
+      invalidCount: 0,
+      snippetCount: 0,
+    };
+
+const initialState = JSON.stringify({
+  rawJson: seedRawJson,
+  formattedJson: seedFormattedJson,
+  snippets,
+  operations,
+  summary,
+});
+
+const tabs = [
+  { key: "formatter", label: "Formatter" },
+  { key: "snippets", label: "Snippets" },
+  { key: "history", label: "History" },
 ];
 ---
 
-<AppShell title={title} description={description}>
+<AppShell title={`${APP_META.name} App`} description={`Protected workspace for ${APP_META.name}.`}>
+  <AvPageHeader
+    title={APP_META.name}
+    description="Format, minify, validate, and save private JSON snippets with account-level history."
+  />
+
   <section class="av-section">
     <AvContainer>
-      <div class="av-auth-stack-lg">
-        <AvCard className="av-auth-card">
-          <div class="av-auth-stack-md">
-            <div class="av-auth-stack-xs">
-              <p class="av-kicker">Protected Workspace</p>
-              <h1 class="av-section-title">{APP_META.name}</h1>
-              <p class="av-text-soft">
-                JSON Formatter is ready for the next development phase. This protected route is reserved for the core app workflow that signed-in users will use as the product takes shape.
-              </p>
+      <div
+        class="av-auth-stack-lg"
+        x-data="{ closeDrawer() { $store.json.closeSaveDrawer(); } }"
+        x-init={`$store.json.seed(${initialState.replace(/`/g, "\\`")})`}
+      >
+        <JsonFormatterDashboardSummary summary={summary} />
+
+        <AvCard>
+          <div class="json-formatter-shell">
+            <AvTabs
+              tabs={tabs}
+              activeKey="$store.json.activeTab"
+              onChange="$store.json.setTab($event.currentTarget.dataset.tabKey)"
+              aria-label="JSON formatter views"
+            />
+
+            <div x-show="$store.json.activeTab === 'formatter'" x-cloak class="av-auth-stack-lg">
+              <div class="json-actions-bar">
+                <div class="av-row-wrap">
+                  <AvButton type="button" @click.prevent="$store.json.format()" :disabled="$store.json.loading">
+                    Format
+                  </AvButton>
+                  <AvButton type="button" variant="ghost" @click.prevent="$store.json.minify()" :disabled="$store.json.loading">
+                    Minify
+                  </AvButton>
+                  <AvButton type="button" variant="ghost" @click.prevent="$store.json.validate()" :disabled="$store.json.loading">
+                    Validate
+                  </AvButton>
+                  <AvButton type="button" variant="ghost" @click.prevent="$store.json.copyOutput()">
+                    Copy
+                  </AvButton>
+                </div>
+                <div class="av-row-wrap">
+                  <AvButton
+                    type="button"
+                    variant="outline"
+                    @click.prevent="$store.json.openSaveDrawer()"
+                    :disabled="$store.json.loading || !$store.json.formattedJson.trim()"
+                  >
+                    Save snippet
+                  </AvButton>
+                  <AvButton href="/signout" variant="ghost">Sign out</AvButton>
+                </div>
+              </div>
+
+              <div class="json-editor-grid">
+                <AvCard variant="soft" className="av-card--fullheight">
+                  <div class="av-auth-stack-sm">
+                    <div>
+                      <h2 class="av-card-heading">Input JSON</h2>
+                      <p class="av-text-soft">Paste or edit raw JSON.</p>
+                    </div>
+                    <textarea
+                      class="json-textarea"
+                      x-model="$store.json.rawJson"
+                      spellcheck="false"
+                      aria-label="Raw JSON input"
+                    ></textarea>
+                  </div>
+                </AvCard>
+
+                <AvCard variant="soft" className="av-card--fullheight">
+                  <div class="av-auth-stack-sm">
+                    <div>
+                      <h2 class="av-card-heading">Output</h2>
+                      <p class="av-text-soft">Formatted or minified result.</p>
+                    </div>
+                    <textarea
+                      class="json-textarea json-textarea-readonly"
+                      x-model="$store.json.formattedJson"
+                      readonly
+                      spellcheck="false"
+                      aria-label="Formatted JSON output"
+                    ></textarea>
+                  </div>
+                </AvCard>
+              </div>
+
+              <AvCard variant="soft">
+                <div class="json-status-panel">
+                  <div class="av-auth-stack-xs">
+                    <p class="av-card-heading">Status</p>
+                    <div class="av-row-wrap">
+                      <AvBadge
+                        variant="success"
+                        x-show="$store.json.isValid === true"
+                        x-cloak
+                        label="Valid JSON"
+                      />
+                      <AvBadge
+                        variant="error"
+                        x-show="$store.json.isValid === false"
+                        x-cloak
+                        label="Invalid JSON"
+                      />
+                      <AvBadge
+                        variant="warning"
+                        x-show="$store.json.isValid === null"
+                        x-cloak
+                        label="Awaiting validation"
+                      />
+                      <AvBadge variant="default" x-text="`Last action: ${$store.json.operationType}`" />
+                    </div>
+                  </div>
+                  <p class="av-text-soft" x-show="!$store.json.errorMessage" x-cloak>
+                    No validation errors.
+                  </p>
+                  <p class="json-error-text" x-show="$store.json.errorMessage" x-cloak x-text="$store.json.errorMessage"></p>
+                </div>
+              </AvCard>
+
+              <AvCard variant="soft">
+                <div class="av-grid-auto av-grid-auto--260">
+                  <div class="av-auth-stack-xxs">
+                    <p class="av-card-heading">Total operations</p>
+                    <h3 class="av-app-card-title" x-text="$store.json.summary.totalOperations"></h3>
+                  </div>
+                  <div class="av-auth-stack-xxs">
+                    <p class="av-card-heading">Valid rate</p>
+                    <h3 class="av-app-card-title" x-text="$store.json.validPercent()"></h3>
+                  </div>
+                  <div class="av-auth-stack-xxs">
+                    <p class="av-card-heading">Saved snippets</p>
+                    <h3 class="av-app-card-title" x-text="$store.json.summary.snippetCount"></h3>
+                  </div>
+                </div>
+              </AvCard>
             </div>
 
-            <div class="av-row-wrap">
-              <AvButton href="/">Back to landing</AvButton>
-              <AvButton href="/signout" variant="ghost">Sign out</AvButton>
+            <div x-show="$store.json.activeTab === 'snippets'" x-cloak>
+              <AvCard variant="soft">
+                <div class="av-auth-stack-md">
+                  <div>
+                    <h2 class="av-card-heading">Saved snippets</h2>
+                    <p class="av-text-soft">Select a snippet to load it back into the formatter.</p>
+                  </div>
+
+                  <template x-if="$store.json.snippets.length === 0">
+                    <p class="av-text-soft">No snippets saved yet.</p>
+                  </template>
+
+                  <ul class="av-list" x-show="$store.json.snippets.length > 0" x-cloak>
+                    <template x-for="snippet in $store.json.snippets" :key="snippet.id">
+                      <li class="json-list-row">
+                        <div class="av-auth-stack-xxs">
+                          <strong x-text="snippet.title"></strong>
+                          <p class="av-text-soft" x-text="new Date(snippet.updatedAt).toLocaleString()"></p>
+                        </div>
+                        <AvButton
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          @click.prevent="$store.json.loadSnippet(snippet)"
+                        >
+                          Load
+                        </AvButton>
+                      </li>
+                    </template>
+                  </ul>
+                </div>
+              </AvCard>
+            </div>
+
+            <div x-show="$store.json.activeTab === 'history'" x-cloak>
+              <AvCard variant="soft">
+                <div class="av-auth-stack-md">
+                  <div>
+                    <h2 class="av-card-heading">Recent operations</h2>
+                    <p class="av-text-soft">Last 20 formatting actions for your account.</p>
+                  </div>
+
+                  <template x-if="$store.json.operations.length === 0">
+                    <p class="av-text-soft">No operations logged yet.</p>
+                  </template>
+
+                  <ul class="av-list" x-show="$store.json.operations.length > 0" x-cloak>
+                    <template x-for="operation in $store.json.operations" :key="operation.id">
+                      <li class="json-list-row">
+                        <div class="av-auth-stack-xxs">
+                          <strong x-text="operation.operationType"></strong>
+                          <p class="av-text-soft" x-text="new Date(operation.createdAt).toLocaleString()"></p>
+                        </div>
+                        <div class="json-history-meta">
+                          <AvBadge
+                            variant="success"
+                            x-show="operation.isValid"
+                            x-cloak
+                            label="Valid"
+                          />
+                          <AvBadge
+                            variant="error"
+                            x-show="!operation.isValid"
+                            x-cloak
+                            label="Invalid"
+                          />
+                          <AvBadge variant="default" x-text="`${operation.inputSize} → ${operation.outputSize} bytes`" />
+                        </div>
+                      </li>
+                    </template>
+                  </ul>
+                </div>
+              </AvCard>
             </div>
           </div>
         </AvCard>
 
-        <div class="grid gap-4 md:grid-cols-3">
-          {checkpoints.map((item) => (
-            <AvCard variant="soft" className="av-auth-stack-sm">
-              <h2 class="av-card-heading">Baseline ready</h2>
-              <p class="av-text-soft">{item}</p>
-            </AvCard>
-          ))}
+        <div x-show="$store.json.saveDrawerOpen" x-cloak>
+          <AvDrawer title="Save snippet" description="Store a private JSON snapshot for later reuse.">
+            <div class="av-auth-stack-md av-drawer-body-scroll">
+              <label class="json-field">
+                <span class="json-field-label">Title</span>
+                <input
+                  type="text"
+                  class="json-input"
+                  x-model="$store.json.snippetTitle"
+                  maxlength="120"
+                  placeholder="Production payload"
+                />
+              </label>
+
+              <div class="av-auth-stack-xs">
+                <p class="av-card-heading">Preview</p>
+                <pre class="json-output-preview" x-text="$store.json.formattedJson"></pre>
+              </div>
+
+              <p class="json-error-text" x-show="$store.json.error" x-cloak x-text="$store.json.error"></p>
+            </div>
+
+            <Fragment slot="footer">
+              <div class="av-drawer-footer-stack">
+                <div class="drawer-footer-notice"></div>
+                <div class="av-drawer-footer-actions">
+                  <AvButton type="button" variant="ghost" @click.prevent="$store.json.closeSaveDrawer()">
+                    Cancel
+                  </AvButton>
+                  <AvButton
+                    type="button"
+                    @click.prevent="$store.json.saveSnippet()"
+                    :disabled="$store.json.loading || !$store.json.snippetTitle.trim()"
+                  >
+                    Save snippet
+                  </AvButton>
+                </div>
+              </div>
+            </Fragment>
+          </AvDrawer>
         </div>
       </div>
     </AvContainer>

@@ -1,3 +1,163 @@
+[x-cloak] {
+  display: none !important;
+}
+
+:root {
+  --json-badge-success-bg: color-mix(in srgb, var(--av-accent) 18%, var(--av-surface));
+  --json-badge-success-text: color-mix(in srgb, var(--av-accent) 78%, white);
+  --json-badge-success-border: color-mix(in srgb, var(--av-accent) 35%, var(--av-border-subtle));
+  --json-badge-error-bg: color-mix(in srgb, var(--av-secondary) 18%, var(--av-surface));
+  --json-badge-error-text: color-mix(in srgb, var(--av-secondary) 82%, white);
+  --json-badge-error-border: color-mix(in srgb, var(--av-secondary) 35%, var(--av-border-subtle));
+  --json-badge-warning-bg: color-mix(in srgb, var(--av-primary) 18%, var(--av-surface));
+  --json-badge-warning-text: color-mix(in srgb, var(--av-primary) 82%, white);
+  --json-badge-warning-border: color-mix(in srgb, var(--av-primary) 35%, var(--av-border-subtle));
+}
+
+.json-formatter-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.av-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  border-bottom: 1px solid var(--av-border-subtle);
+  padding-bottom: 1rem;
+}
+
+.av-tabs__tab {
+  appearance: none;
+  border: 1px solid var(--av-border-subtle);
+  background: var(--av-surface, #ffffff);
+  color: var(--av-text-soft);
+  border-radius: 999px;
+  padding: 0.625rem 1rem;
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.av-tabs__tab.is-active {
+  background: var(--av-primary-soft);
+  color: var(--av-text-strong);
+  border-color: var(--av-border-strong);
+}
+
+.av-local-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: 999px;
+  border: 1px solid var(--av-border-subtle);
+  padding: 0.3rem 0.7rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.av-local-badge-default {
+  background: var(--av-surface-soft);
+  color: var(--av-text);
+}
+
+.av-local-badge-success {
+  background: var(--json-badge-success-bg);
+  color: var(--json-badge-success-text);
+  border-color: var(--json-badge-success-border);
+}
+
+.av-local-badge-error {
+  background: var(--json-badge-error-bg);
+  color: var(--json-badge-error-text);
+  border-color: var(--json-badge-error-border);
+}
+
+.av-local-badge-warning {
+  background: var(--json-badge-warning-bg);
+  color: var(--json-badge-warning-text);
+  border-color: var(--json-badge-warning-border);
+}
+
+.json-actions-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.json-editor-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.json-textarea,
+.json-input,
+.json-output-preview {
+  width: 100%;
+  border: 1px solid color-mix(in srgb, var(--av-border, #d1d5db) 90%, transparent);
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--av-surface, #ffffff) 92%, var(--av-bg, #f8fafc));
+  color: var(--av-text, #111827);
+  font: inherit;
+}
+
+.json-textarea,
+.json-output-preview {
+  min-height: 22rem;
+  padding: 1rem;
+  font-family: "SFMono-Regular", "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  resize: vertical;
+}
+
+.json-input {
+  padding: 0.875rem 1rem;
+}
+
+.json-textarea-readonly,
+.json-output-preview {
+  background: color-mix(in srgb, var(--av-surface-soft, #f3f4f6) 88%, var(--av-bg, #f8fafc));
+}
+
+.json-status-panel,
+.json-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.json-field-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--av-text, #111827);
+}
+
+.json-error-text {
+  color: var(--av-danger, #b91c1c);
+  font-size: 0.95rem;
+}
+
+.json-list-row {
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.json-history-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
 /* Drawer UX scaffold hooks (App-Starter baseline). */
 .drawer-body-scroll,
 .av-drawer-body-scroll {
@@ -28,6 +188,16 @@
 }
 
 @media (max-width: 640px) {
+  .json-actions-bar,
+  .json-list-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .json-history-meta {
+    justify-content: flex-start;
+  }
+
   .av-drawer-footer-actions {
     flex-direction: column-reverse;
     align-items: stretch;
@@ -35,5 +205,11 @@
 
   .av-drawer-footer-actions :where(button, a) {
     width: 100%;
+  }
+}
+
+@media (min-width: 960px) {
+  .json-editor-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

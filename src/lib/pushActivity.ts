@@ -1,5 +1,5 @@
 import { APP_META } from "../app.meta";
-import type { AppStarterDashboardSummaryV1 } from "../dashboard/summary.schema";
+import type { JsonFormatterDashboardSummaryV1 } from "../dashboard/summary.schema";
 import { postWebhook } from "./webhook";
 
 const resolveActivityUrl = (baseUrl?: string | null, overrideUrl?: string | null) => {
@@ -17,7 +17,7 @@ type AppStarterActivity = {
 export const pushAppStarterActivity = async (params: {
   userId: string;
   activity: AppStarterActivity;
-  summary: AppStarterDashboardSummaryV1;
+  summary: JsonFormatterDashboardSummaryV1;
 }): Promise<void> => {
   try {
     const baseUrl = import.meta.env.PARENT_APP_URL;

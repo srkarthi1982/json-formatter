@@ -1,0 +1,42 @@
+---
+interface TabItem {
+  key: string;
+  label: string;
+}
+
+interface Props {
+  tabs: TabItem[];
+  activeKey: string;
+  onChange?: string;
+  className?: string;
+  class?: string;
+  [key: string]: any;
+}
+
+const {
+  tabs,
+  activeKey,
+  onChange,
+  className = "",
+  class: extraClass = "",
+  ...rest
+} = Astro.props as Props;
+
+const rootClassName = ["av-tabs", className, extraClass].filter(Boolean).join(" ");
+---
+
+<div class={rootClassName} role="tablist" {...rest}>
+  {tabs.map((tab) => (
+    <button
+      type="button"
+      class="av-tabs__tab"
+      role="tab"
+      data-tab-key={tab.key}
+      x-bind:class={`{ 'is-active': ${activeKey} === '${tab.key}' }`}
+      x-bind:aria-selected={`${activeKey} === '${tab.key}'`}
+      x-on:click={onChange}
+    >
+      {tab.label}
+    </button>
+  ))}
+</div>

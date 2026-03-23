@@ -1,0 +1,39 @@
+---
+import { AvCard } from "@ansiversa/components";
+import type { JsonFormatterDashboardSummaryV1 } from "../dashboard/summary";
+
+interface Props {
+  summary: JsonFormatterDashboardSummaryV1;
+}
+
+const { summary } = Astro.props as Props;
+const validPercent = summary.totalOperations > 0
+  ? Math.round((summary.validCount / summary.totalOperations) * 100)
+  : 0;
+---
+
+<div class="av-grid-auto av-grid-auto--260">
+  <AvCard variant="soft" className="av-card--fullheight">
+    <div class="av-auth-stack-xxs">
+      <p class="av-card-heading">Total operations</p>
+      <h2 class="av-app-card-title">{summary.totalOperations}</h2>
+      <p class="av-text-soft">All formatter actions</p>
+    </div>
+  </AvCard>
+
+  <AvCard variant="soft" className="av-card--fullheight">
+    <div class="av-auth-stack-xxs">
+      <p class="av-card-heading">Valid rate</p>
+      <h2 class="av-app-card-title">{validPercent}%</h2>
+      <p class="av-text-soft">{summary.validCount} valid / {summary.invalidCount} invalid</p>
+    </div>
+  </AvCard>
+
+  <AvCard variant="soft" className="av-card--fullheight">
+    <div class="av-auth-stack-xxs">
+      <p class="av-card-heading">Saved snippets</p>
+      <h2 class="av-app-card-title">{summary.snippetCount}</h2>
+      <p class="av-text-soft">Private to your account</p>
+    </div>
+  </AvCard>
+</div>

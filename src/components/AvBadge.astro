@@ -1,0 +1,30 @@
+---
+interface Props {
+  label?: string;
+  variant?: "default" | "success" | "error" | "warning";
+  className?: string;
+  class?: string;
+  [key: string]: any;
+}
+
+const {
+  label,
+  variant = "default",
+  className = "",
+  class: extraClass = "",
+  ...rest
+} = Astro.props as Props;
+
+const variantClassName = {
+  default: "av-local-badge-default",
+  success: "av-local-badge-success",
+  error: "av-local-badge-error",
+  warning: "av-local-badge-warning",
+}[variant];
+
+const badgeClassName = ["av-local-badge", variantClassName, className, extraClass].filter(Boolean).join(" ");
+---
+
+<span class={badgeClassName} {...rest}>
+  {label ?? <slot />}
+</span>
