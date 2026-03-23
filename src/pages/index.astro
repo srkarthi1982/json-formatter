@@ -1,92 +1,133 @@
 ---
+import { AvButton, AvCard, AvContainer } from "@ansiversa/components";
 import AppShell from "../layouts/AppShell.astro";
-import { AvContainer, AvButton } from "@ansiversa/components";
+import { APP_META } from "../app.meta";
+import { buildRootRedirect } from "../lib/redirects";
 
-const title = "JSON Formatter – Ansiversa";
-const description = "Clean and format JSON data.";
+const rootAppUrl = Astro.locals.rootAppUrl ?? "https://ansiversa.com";
+const appUrl = new URL("/app", Astro.url).toString();
+const startHref = Astro.locals.isAuthenticated
+  ? "/app"
+  : buildRootRedirect(rootAppUrl, "/login", appUrl);
+const signInHref = buildRootRedirect(rootAppUrl, "/login", appUrl);
+
+const title = `${APP_META.name} | Ansiversa`;
+const description = APP_META.description;
+
+const valueCards = [
+  {
+    "title": "Fast when it matters",
+    "description": "The baseline is intentionally lean, making room for future utility workflows that solve the task quickly and get out of the way."
+  },
+  {
+    "title": "Clean output path",
+    "description": "Shared layouts and predictable routes keep the interface organized so the app can stay practical instead of visually noisy."
+  },
+  {
+    "title": "Future-safe baseline",
+    "description": "The repo is aligned with current Ansiversa contracts, making later DB, actions, and UI work safer to add without structural rework."
+  }
+];
+const reasonsToUse = [
+  {
+    "title": "One clear job",
+    "description": "JSON Formatter stays anchored to a single purpose so the future product can remain focused instead of sprawling."
+  },
+  {
+    "title": "Shared Ansiversa standards",
+    "description": "The landing page, protected workspace, navbar, footer, and parent-auth routing already follow the current ecosystem baseline."
+  },
+  {
+    "title": "Ready for the next implementation phase",
+    "description": "JSON Formatter is already aligned to the current Ansiversa app contract, so the next build phase can stay focused on real product work."
+  }
+];
 ---
 
 <AppShell title={title} description={description}>
-  <!-- Hero -->
-  <section class="av-hero">
-    <AvContainer size="narrow" className="av-hero__content--narrow">
-      <div class="av-hero__content">
-        <div class="av-kicker">
-          <span>Developer & Utility · Ansiversa Mini App</span>
+  <section class="av-section">
+    <AvContainer>
+      <div class="av-auth-stack-lg">
+        <AvCard className="av-auth-card">
+          <div class="av-auth-stack-md">
+            <div class="av-auth-stack-xs">
+              <p class="av-kicker">Utility Mini-App</p>
+              <h1 class="av-section-title">JSON Formatter is being prepared to handle practical work with less friction and more speed</h1>
+              <p class="av-text-soft">
+                Clean and format JSON data. Built for speed, practicality, and efficiency, JSON Formatter is taking shape as a focused Ansiversa experience with a calm interface, clear direction, and room for the real workflow to grow well.
+              </p>
+            </div>
+
+            <div class="av-row-wrap">
+              <AvButton href={startHref}>Open JSON Formatter</AvButton>
+              <AvButton href={signInHref} variant="ghost">Sign in</AvButton>
+            </div>
+
+            <p class="av-text-soft">
+              Coming soon in Utility. The shared shell, route structure, and parent-auth flow are already in place.
+            </p>
+          </div>
+        </AvCard>
+
+        <div class="grid gap-4 md:grid-cols-3">
+          {valueCards.map((card) => (
+            <AvCard variant="soft" className="av-auth-stack-sm">
+              <h2 class="av-card-heading">{card.title}</h2>
+              <p class="av-text-soft">{card.description}</p>
+            </AvCard>
+          ))}
         </div>
-        <h1 class="av-gradient-text">JSON Formatter</h1>
-        <p>
-          Clean and format JSON data.
-        </p>
-      </div>
-      <div class="av-cta-row">
-        <AvButton href="https://json-formatter.ansiversa.com">Launch JSON</AvButton>
-      </div>
-    </AvContainer>
-  </section>
 
-  <!-- Problem -->
-  <section class="av-section">
-    <AvContainer size="narrow">
-      <div class="av-section-header">
-        <h2 class="av-section-title">The problem it solves</h2>
-        <p class="av-section-lead">
-          You often switch between many small tools for everyday tasks.
-        </p>
-      </div>
-      <div class="av-section-body space-y-3 text-slate-300">
-        <p>JSON Formatter gives you one focused place to get this specific job done.</p>
-      </div>
-    </AvContainer>
-  </section>
+        <div class="grid gap-4 md:grid-cols-[1.1fr_0.9fr]">
+          <AvCard variant="soft" className="av-auth-stack-sm">
+            <p class="av-kicker">What this app will do</p>
+            <h2 class="av-card-heading">JSON Formatter</h2>
+            <p class="av-text-soft">
+              JSON Formatter is a focused utility tool inside Ansiversa. Its first release is being shaped around one practical job: Clean and format JSON data.
+            </p>
+            <p class="av-text-soft">
+              The repo already follows Ansiversa layout, auth, metadata, and route standards, so the next build phase can stay tightly scoped to the actual product workflow.
+            </p>
+          </AvCard>
 
-  <!-- Why this mini app -->
-  <section class="av-section">
-    <AvContainer size="narrow">
-      <div class="av-section-header">
-        <h2 class="av-section-title">Why JSON Formatter feels different</h2>
-        <p class="av-section-lead">
-          A focused mini app inside the larger Ansiversa ecosystem.
-        </p>
-      </div>
-      <div class="av-section-body">
-        <ul class="space-y-2 text-slate-300 list-disc list-inside">
-          <li>Removes the need to search for another one-off tool online.</li>
-          <li>Keeps your workflow fast, clean, and repeatable.</li>
-          <li>Lives inside the same secure, familiar Ansiversa environment.</li>
-        </ul>
-      </div>
-    </AvContainer>
-  </section>
+          <AvCard className="av-auth-card">
+            <div class="av-auth-stack-sm">
+              <p class="av-kicker">Category fit</p>
+              <h2 class="av-card-heading">Utility</h2>
+              <p class="av-text-soft">
+                JSON Formatter is being positioned with a speed, practicality, and efficiency tone so it feels consistent with the
+                rest of the Ansiversa ecosystem from the first load.
+              </p>
+            </div>
+          </AvCard>
+        </div>
 
-  <!-- How it works -->
-  <section class="av-section">
-    <AvContainer size="narrow">
-      <div class="av-section-header">
-        <h2 class="av-section-title">How it works</h2>
-        <p class="av-section-lead">
-          Simple, clear steps so people can start in under a minute.
-        </p>
-      </div>
-      <ol class="av-section-body space-y-2 text-slate-300 list-decimal list-inside">
-        <li>Open JSON Formatter whenever this task comes up.</li>
-        <li>Paste, upload, or input exactly what you need to process.</li>
-        <li>Get a clean result you can download, copy, or reuse instantly.</li>
-      </ol>
-    </AvContainer>
-  </section>
+        <div class="grid gap-4 md:grid-cols-3">
+          {reasonsToUse.map((reason) => (
+            <AvCard variant="soft" className="av-auth-stack-sm">
+              <p class="av-kicker">Why use it</p>
+              <h2 class="av-card-heading">{reason.title}</h2>
+              <p class="av-text-soft">{reason.description}</p>
+            </AvCard>
+          ))}
+        </div>
 
-  <!-- Final CTA -->
-  <section class="av-section">
-    <AvContainer size="narrow">
-      <div class="av-section-header">
-        <h2 class="av-section-title">Ready to try JSON Formatter?</h2>
-        <p class="av-section-lead">
-          Open the app, follow the simple flow, and let it handle the heavy lifting.
-        </p>
-      </div>
-      <div class="av-cta-row">
-        <AvButton href="https://json-formatter.ansiversa.com">Start with JSON</AvButton>
+        <AvCard className="av-auth-card">
+          <div class="av-auth-stack-md">
+            <div class="av-auth-stack-xs">
+              <p class="av-kicker">Build in progress</p>
+              <h2 class="av-section-title">The premium baseline is locked. The domain workflow is next.</h2>
+              <p class="av-text-soft">
+                JSON Formatter already uses the shared Ansiversa shell and route conventions, so future implementation can move directly into the real product flow without another structural reset.
+              </p>
+            </div>
+
+            <div class="av-row-wrap">
+              <AvButton href={startHref}>Enter protected workspace</AvButton>
+              <AvButton href={signInHref} variant="ghost">Return through Ansiversa</AvButton>
+            </div>
+          </div>
+        </AvCard>
       </div>
     </AvContainer>
   </section>

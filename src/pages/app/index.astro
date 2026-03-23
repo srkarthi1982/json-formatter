@@ -1,0 +1,48 @@
+---
+import { AvButton, AvCard, AvContainer } from "@ansiversa/components";
+import AppShell from "../../layouts/AppShell.astro";
+import { APP_META } from "../../app.meta";
+
+const title = `${APP_META.name} App`;
+const description = `Protected workspace for ${APP_META.name}.`;
+
+const checkpoints = [
+  "The public landing page is aligned to the current Ansiversa product standard.",
+  "Authenticated entry stays on /app so future workflows follow the shared ecosystem pattern.",
+  "Shared metadata, middleware, layout, and component dependencies are already synced for the next build phase.",
+];
+---
+
+<AppShell title={title} description={description}>
+  <section class="av-section">
+    <AvContainer>
+      <div class="av-auth-stack-lg">
+        <AvCard className="av-auth-card">
+          <div class="av-auth-stack-md">
+            <div class="av-auth-stack-xs">
+              <p class="av-kicker">Protected Workspace</p>
+              <h1 class="av-section-title">{APP_META.name}</h1>
+              <p class="av-text-soft">
+                JSON Formatter is ready for the next development phase. This protected route is reserved for the core app workflow that signed-in users will use as the product takes shape.
+              </p>
+            </div>
+
+            <div class="av-row-wrap">
+              <AvButton href="/">Back to landing</AvButton>
+              <AvButton href="/signout" variant="ghost">Sign out</AvButton>
+            </div>
+          </div>
+        </AvCard>
+
+        <div class="grid gap-4 md:grid-cols-3">
+          {checkpoints.map((item) => (
+            <AvCard variant="soft" className="av-auth-stack-sm">
+              <h2 class="av-card-heading">Baseline ready</h2>
+              <p class="av-text-soft">{item}</p>
+            </AvCard>
+          ))}
+        </div>
+      </div>
+    </AvContainer>
+  </section>
+</AppShell>

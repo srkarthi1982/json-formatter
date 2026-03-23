@@ -25,6 +25,7 @@ MANDATORY: After completing each task, update this repo’s AGENTS.md Task Log (
 - Review this repo's existing AGENTS.md Task Log history before making changes.
 
 ## Task Log (Recent)
+- 2026-03-23 Seeded from latest app-starter V2 baseline: synced shared starter structure (APP_META, public /, protected /app, middleware/auth/session/dev files, layouts, docs, and integration checklist), aligned `@ansiversa/components` to `^0.0.169`, replaced the legacy landing with a premium category-aligned coming-soon homepage, and validated with npm install, npm run typecheck, npm run build.
 - Keep newest first; include date and short summary.
 - 2026-02-09 Added repo-level AGENTS.md enforcement contract (workspace reference + mandatory task-log update rule).
 - 2026-02-09 Initialized repo AGENTS baseline for single-repo Codex/AI safety.
